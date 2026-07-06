@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaCouncil — AI Investment Council & Portfolio Optimizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #070A13;
+            --bg-panel: #0C1222;
+            --bg-panel-alt: #121B32;
+            --bg-input: #04070D;
+            --border: #1E2942;
+            --border-soft: #141C2D;
+            --gold: #D4AF37;
+            --gold-soft: rgba(212, 175, 55, 0.08);
+            --gold-dim: rgba(212, 175, 55, 0.25);
+            --emerald: #0DCA86;
+            --red: #FF4A5A;
+            --amber: #F1A122;
+            --text-primary: #F0F2F7;
+            --text-muted: #9AA5BF;
+            --text-dim: #525D73;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(ellipse at top, #0E1629 0%, #060912 70%);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding-bottom: 3rem;
+            letter-spacing: -0.01em;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1C263E;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold-dim);
+        }
+
+        .tape-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-deep);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .tape {
+            display: inline-block;
+            padding-left: 100%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+            animation: scroll-left 32s linear infinite;
+        }
+
+        .tape span {
+            margin-right: 2.5rem;
+        }
+
+        .tape .up {
+            color: var(--emerald);
+            font-weight: 500;
+        }
+
+        .tape .down {
+            color: var(--red);
+            font-weight: 500;
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .brand h1 {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 2.2rem;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .brand h1 em {
+            font-style: normal;
+            color: var(--gold);
+            font-weight: 400;
+        }
+
+        .brand p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            letter-spacing: 0.01em;
+        }
+
+        .status {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-align: right;
+            letter-spacing: 0.05em;
+        }
+
+        .status .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            margin-left: 0.5rem;
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .settings-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .settings-panel:hover {
+            background: #0e162a;
+        }
+
+        .settings-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.01em;
+        }
+
+        .settings-head .chev {
+            transition: transform 0.2s;
+            color: var(--gold);
+        }
+
+        .settings-panel.open .chev {
+            transform: rotate(180deg);
+        }
+
+        .settings-body {
+            display: none;
+            margin-top: 1rem;
+            grid-template-columns: 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .settings-panel.open .settings-body {
+            display: grid;
+        }
+
+        .settings-body input {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            padding: 0.65rem 0.85rem;
+            border-radius: 6px;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        .settings-body input:focus {
+            border-color: var(--gold-dim);
+        }
+
+        .settings-note {
+            grid-column: 1/-1;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+
+        .settings-note a {
+            color: var(--gold);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--gold);
+        }
+
+        .key-status {
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.5rem 0.9rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            letter-spacing: 0.05em;
+        }
+
+        .key-status.saved {
+            background: rgba(13, 202, 134, 0.1);
+            color: var(--emerald);
+        }
+
+        .key-status.empty {
+            background: rgba(255, 74, 90, 0.08);
+            color: var(--red);
+        }
+
+        .search-bar {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            padding: 0.8rem 1.1rem;
+            border-radius: 6px;
+            outline: none;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--gold-dim);
+            box-shadow: 0 0 0 3px var(--gold-soft);
+        }
+
+        .run-btn {
+            background: linear-gradient(135deg, #EAD075, var(--gold));
+            color: #070A13;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            transition: transform 0.15s, opacity 0.15s;
+            white-space: nowrap;
+        }
+
+        .run-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .run-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .run-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .status-line {
+            display: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--gold);
+            padding: 0.9rem 1.1rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--gold-dim);
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-line.active {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .status-line .spinner {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--gold-dim);
+            border-top-color: var(--gold);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-line {
+            display: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--red);
+            padding: 0.9rem 1.1rem;
+            background: rgba(255, 74, 90, 0.05);
+            border: 1px solid rgba(255, 74, 90, 0.25);
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-line.active {
+            display: block;
+        }
+
+        .overview {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media(max-width:720px) {
+            .overview {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .gauge-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+        }
+
+        .gauge-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .gauge-score {
+            font-family: 'Fraunces', serif;
+            font-size: 2.4rem;
+            color: var(--text-primary);
+            margin-top: -2.8rem;
+            font-weight: 600;
+        }
+
+        .gauge-score span {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+
+        .signal-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1.2rem;
+        }
+
+        .signal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .signal-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.4rem 1.2rem;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+            background: var(--bg-deep);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        .company-line {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .company-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .fund-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+
+        @media(max-width:900px) {
+            .fund-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .fund-item {
+            background: var(--bg-deep);
+            padding: 0.6rem 0.8rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-soft);
+        }
+
+        .fund-item .label {
+            font-size: 0.62rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        .fund-item .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-top: 0.2rem;
+            font-weight: 500;
+        }
+
+        .quadrants {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media(max-width:1100px) {
+            .quadrants {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quad-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .quad-head {
+            background: var(--bg-deep);
+            padding: 0.85rem 1.25rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quad-head .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--gold);
+            background: var(--gold-soft);
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            border: 1px solid var(--gold-dim);
+        }
+
+        .quad-grid {
+            padding: 1.25rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .expert-card {
+            background: var(--bg-deep);
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            padding: 0.9rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            border-left: 3px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .expert-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .expert-card.buy {
+            border-left-color: var(--emerald);
+        }
+
+        .expert-card.hold {
+            border-left-color: var(--amber);
+        }
+
+        .expert-card.avoid {
+            border-left-color: var(--red);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .expert-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .expert-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .expert-score.buy {
+            color: var(--emerald);
+        }
+
+        .expert-score.hold {
+            color: var(--amber);
+        }
+
+        .expert-score.avoid {
+            color: var(--red);
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 3px;
+            background: var(--border-soft);
+            border-radius: 1.5px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--text-dim);
+            transition: width 0.9s ease-out;
+        }
+
+        .bar-fill.buy {
+            background: var(--emerald);
+        }
+
+        .bar-fill.hold {
+            background: var(--amber);
+        }
+
+        .bar-fill.avoid {
+            background: var(--red);
+        }
+
+        .expert-reason {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        footer {
+            margin-top: 3.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            text-align: center;
+        }
+
+        .credits {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        .disclaimer {
+            border: 1px solid rgba(255, 74, 90, 0.2);
+            background: rgba(255, 74, 90, 0.02);
+            color: #E29AA0;
+            font-size: 0.72rem;
+            line-height: 1.6;
+            padding: 0.85rem 1.25rem;
+            border-radius: 6px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="tape-wrap">
+        <div class="tape" id="tape"></div>
+    </div>
+
+    <div class="container">
+
+        <header>
+            <div class="brand">
+                <h1>Alpha<em>Council</em></h1>
+                <p>35 legendary trading &amp; investing minds, one consensus call</p>
+            </div>
+            <div class="status">ENGINE: BROWSER-NATIVE // NO SERVER REQUIRED<span class="dot"></span></div>
+        </header>
+
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-head" onclick="toggleSettings()">
+                <span>⚙ Gemini API Key Setup</span>
+                <span class="chev">▾</span>
+            </div>
+            <div class="settings-body">
+                <input type="password" id="apiKeyInput"
+                    placeholder="Paste your Gemini API key here (starts with AIza...)">
+                <span class="key-status empty" id="keyStatus">NOT SET</span>
+                <div class="settings-note">
+                    Your key stays in this browser tab only — it is never saved to disk or sent anywhere except Google's
+                    Gemini API.
+                    Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank"
+                        rel="noopener">aistudio.google.com/apikey</a>.
+                    Re-enter it each time you reload this page — that's intentional, so it's safe to publish this file
+                    publicly (e.g. on GitHub).
+                </div>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="tickerInput"
+                placeholder="ENTER A COMPANY OR TICKER (e.g. INFOSYS, TCS, AAPL, TSLA)...">
+            <button class="run-btn" id="runBtn" onclick="triggerAnalysis()">RUN COUNCIL</button>
+        </div>
+
+        <div class="status-line" id="statusLine">
+            <div class="spinner"></div>
+            <span id="statusText">Convening the council...</span>
+        </div>
+
+        <div class="error-line" id="errorLine"></div>
+
+        <div class="overview">
+            <div class="gauge-card">
+                <svg width="160" height="100" viewBox="0 0 160 100">
+                    <path d="M 15 90 A 65 65 0 0 1 145 90" fill="none" stroke="#141C2D" stroke-width="10"
+                        stroke-linecap="round" />
+                    <path id="gaugeArc" d="M 15 90 A 65 65 0 0 1 145 90" fill="none" stroke="#D4AF37" stroke-width="10"
+                        stroke-linecap="round" stroke-dasharray="204" stroke-dashoffset="204" />
+                </svg>
+                <div class="gauge-score" id="gaugeScore">– <span>/100</span></div>
+                <div class="gauge-label">Consensus Rating</div>
+            </div>
+
+            <div class="signal-card">
+                <div class="signal-top">
+                    <div>
+                        <div class="company-line" id="companyName">Awaiting a ticker...</div>
+                        <div class="company-sub" id="companySector">—</div>
+                    </div>
+                    <div class="signal-badge" id="signalBadge">STANDBY</div>
+                </div>
+                <div class="fund-grid">
+                    <div class="fund-item">
+                        <div class="label">P/E</div>
+                        <div class="value" id="valPE">–</div>
+                    </div>
+                    <div class="fund-item">
+                        <div class="label">P/B</div>
+                        <div class="value" id="valPB">–</div>
+                    </div>
+                    <div class="fund-item">
+                        <div class="label">ROE</div>
+                        <div class="value" id="valROE">–</div>
+                    </div>
+                    <div class="fund-item">
+                        <div class="label">D/E</div>
+                        <div class="value" id="valDE">–</div>
+                    </div>
+                    <div class="fund-item">
+                        <div class="label">FCF</div>
+                        <div class="value" id="valFCF">–</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quadrants">
+            <div class="quad-panel">
+                <div class="quad-head"><span>Quadrant I — Forex &amp; Futures Specialists</span><span class="badge"
+                        id="q1-count">0/6</span></div>
+                <div class="quad-grid" id="q1-grid"></div>
+            </div>
+            <div class="quad-panel">
+                <div class="quad-head"><span>Quadrant II — Macro Engine &amp; Fund Timers</span><span class="badge"
+                        id="q2-count">0/8</span></div>
+                <div class="quad-grid" id="q2-grid"></div>
+            </div>
+            <div class="quad-panel">
+                <div class="quad-head"><span>Quadrant III — Quant Systematic Money Machines</span><span class="badge"
+                        id="q3-count">0/10</span></div>
+                <div class="quad-grid" id="q3-grid"></div>
+            </div>
+            <div class="quad-panel">
+                <div class="quad-head"><span>Quadrant IV — Equity &amp; Psychology Specialists</span><span class="badge"
+                        id="q4-count">0/11</span></div>
+                <div class="quad-grid" id="q4-grid"></div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="credits">AlphaCouncil — AI Agents Capstone Project — Built by Nikhil Chandekar</div>
+            <div class="disclaimer">
+                AlphaCouncil is an educational AI agent prototype. All scores and fundamentals are generated by a large
+                language model and may be inaccurate, outdated, or entirely wrong. This is not financial advice. Never
+                make a real trading or investment decision based on this tool alone — always verify independently.
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        const expertConfig = {
+            lipschutz: { name: "Lipschutz", quad: "q1" }, mckay: { name: "McKay", quad: "q1" }, eckhardt: { name: "Eckhardt", quad: "q1" },
+            turtles: { name: "Turtles", quad: "q1" }, trout: { name: "Trout", quad: "q1" }, weiss: { name: "Weiss", quad: "q1" },
+            druckenmiller: { name: "Druckenmiller", quad: "q2" }, driehaus: { name: "Driehaus", quad: "q2" }, blake: { name: "Blake", quad: "q2" },
+            sperandeo: { name: "Sperandeo", quad: "q2" }, oshea: { name: "O'Shea", quad: "q2" }, dalio: { name: "Dalio", quad: "q2" },
+            benedict: { name: "Benedict", quad: "q2" }, ramsey: { name: "Ramsey", quad: "q2" },
+            basso: { name: "Basso", quad: "q3" }, raschke: { name: "Raschke", quad: "q3" }, crt: { name: "CRT Chicago", quad: "q3" },
+            ritchie: { name: "Ritchie Bros.", quad: "q3" }, hull: { name: "Hull", quad: "q3" }, yass: { name: "Yass", quad: "q3" },
+            thorp: { name: "Thorp", quad: "q3" }, woodriff: { name: "Woodriff", quad: "q3" }, mai: { name: "Mai", quad: "q3" }, platt: { name: "Platt", quad: "q3" },
+            greenblatt: { name: "Greenblatt", quad: "q4" }, kahneman: { name: "Kahneman", quad: "q4" }, douglas: { name: "Douglas", quad: "q4" },
+            faulkner: { name: "Faulkner", quad: "q4" }, krausz: { name: "Krausz", quad: "q4" }, clark: { name: "Clark", quad: "q4" },
+            taylor: { name: "Taylor", quad: "q4" }, claugus: { name: "Claugus", quad: "q4" }, vidich: { name: "Vidich", quad: "q4" },
+            daly: { name: "Daly", quad: "q4" }, balodimas: { name: "Balodimas", quad: "q4" }
+        };
+        const QUAD_TOTALS = { q1: 6, q2: 8, q3: 10, q4: 11 };
+
+        let apiKey = "";
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+        }
+
+        document.getElementById('apiKeyInput').addEventListener('input', (e) => {
+            apiKey = e.target.value.trim();
+            const statusEl = document.getElementById('keyStatus');
+            if (apiKey.length > 10) {
+                statusEl.textContent = "KEY SET";
+                statusEl.className = "key-status saved";
+            } else {
+                statusEl.textContent = "NOT SET";
+                statusEl.className = "key-status empty";
+            }
+        });
+
+        function buildTape() {
+            const symbols = [
+                ["NIFTY 50", "up", "+0.62%"], ["SENSEX", "up", "+0.58%"], ["AAPL", "down", "-0.31%"],
+                ["TSLA", "up", "+1.84%"], ["INFY", "up", "+0.94%"], ["TCS", "down", "-0.22%"],
+                ["RELIANCE", "up", "+0.47%"], ["MSFT", "up", "+0.19%"], ["GOOGL", "down", "-0.15%"],
+                ["BAJFINANCE", "up", "+1.12%"], ["HDFCBANK", "down", "-0.08%"], ["NVDA", "up", "+2.31%"]
+            ];
+            const tape = document.getElementById('tape');
+            if (!tape) return;
+            let html = "";
+            for (let i = 0; i < 3; i++) {
+                symbols.forEach(([sym, dir, pct]) => {
+                    html += `<span>${sym} <span class="${dir}">${pct}</span></span>`;
+                });
+            }
+            tape.innerHTML = html;
+        }
+
+        function renderPlaceholders() {
+            const grids = {
+                q1: document.getElementById('q1-grid'), q2: document.getElementById('q2-grid'),
+                q3: document.getElementById('q3-grid'), q4: document.getElementById('q4-grid')
+            };
+            Object.keys(expertConfig).forEach(key => {
+                const exp = expertConfig[key];
+                const targetGrid = grids[exp.quad];
+                if (!targetGrid) return;
+                const card = document.createElement('div');
+                card.className = 'expert-card';
+                card.id = `card-${key}`;
+                card.innerHTML = `
+                    <div class="card-top">
+                      <span class="expert-name">${exp.name}</span>
+                      <span class="expert-score" id="score-${key}">–</span>
+                    </div>
+                    <div class="bar-bg"><div class="bar-fill" id="bar-${key}"></div></div>
+                    <div class="expert-reason" id="reason-${key}">Awaiting analysis...</div>
+                `;
+                targetGrid.appendChild(card);
+            });
+        }
+
+        function buildSchema() {
+            const scoreProps = {};
+            Object.keys(expertConfig).forEach(key => {
+                scoreProps[key] = {
+                    type: "OBJECT",
+                    properties: { score: { type: "INTEGER" }, reason: { type: "STRING" } },
+                    required: ["score", "reason"]
+                };
+            });
+
+            return {
+                type: "OBJECT",
+                properties: {
+                    avg_score: { type: "NUMBER" },
+                    signal_text: { type: "STRING" },
+                    signal_color: { type: "STRING" },
+                    meta: {
+                        type: "OBJECT",
+                        properties: {
+                            company_name: { type: "STRING" }, sector: { type: "STRING" },
+                            trailing_pe: { type: "STRING" }, price_to_book: { type: "STRING" },
+                            roe_percent: { type: "STRING" }, debt_to_equity: { type: "STRING" },
+                            free_cash_flow: { type: "STRING" }
+                        },
+                        required: ["company_name", "sector", "trailing_pe", "price_to_book", "roe_percent", "debt_to_equity", "free_cash_flow"]
+                    },
+                    scores: { type: "OBJECT", properties: scoreProps, required: Object.keys(expertConfig) }
+                },
+                required: ["avg_score", "signal_text", "signal_color", "meta", "scores"]
+            };
+        }
+
+        function buildPrompt(ticker) {
+            const names = Object.entries(expertConfig).map(([k, v]) => `${k} (persona: ${v.name})`).join(", ");
+            return `You are simulating a council of 35 legendary trading and investing personas analyzing "${ticker}".
+                For EACH of these 35 personas: ${names}
+                Give a score from 0-100 reflecting how favorably that persona's specific style and philosophy would view this company/ticker right now, and a one-sentence reason written in a voice consistent with that persona's known approach.
+                Then compute avg_score as the mean of all 35 scores.
+                Set signal_text to one of: "STRONG BUY", "BUY", "HOLD", "AVOID", "STRONG AVOID" based on avg_score.
+                Set signal_color to a hex code matching that signal.
+                Also provide fundamentals in "meta".
+                Respond ONLY with JSON matching the required schema.`;
+        }
+
+        async function triggerAnalysis() {
+            const tickerInput = document.getElementById('tickerInput');
+            const ticker = tickerInput.value.trim();
+            const errorLine = document.getElementById('errorLine');
+            const statusLine = document.getElementById('statusLine');
+            const statusText = document.getElementById('statusText');
+            const runBtn = document.getElementById('runBtn');
+            errorLine.classList.remove('active');
+
+            if (!ticker) {
+                errorLine.textContent = "Enter a company name or ticker symbol first.";
+                errorLine.classList.add('active');
+                return;
+            }
+            if (!apiKey || apiKey.length < 10) {
+                errorLine.textContent = "Add your Gemini API key in the setup panel above before running the council.";
+                errorLine.classList.add('active');
+                document.getElementById('settingsPanel').classList.add('open');
+                return;
+            }
+
+            runBtn.disabled = true;
+            runBtn.textContent = "ANALYZING...";
+            statusLine.classList.add('active');
+            statusText.textContent = `Convening 35 experts on ${ticker.toUpperCase()}...`;
+            try {
+                const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: buildPrompt(ticker) }] }],
+                        generationConfig: { responseMimeType: "application/json", responseSchema: buildSchema() }
+                    })
+                });
+                if (!response.ok) {
+                    let msg = `Request failed (HTTP ${response.status}).`;
+                    try {
+                        const errBody = await response.json();
+                        if (errBody?.error?.message) msg = errBody.error.message;
+                    } catch (_) { }
+                    throw new Error(msg);
+                }
+
+                const data = await response.json();
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!rawText) throw new Error("The model returned an empty response. Try again.");
+
+                const result = JSON.parse(rawText);
+                renderResult(result);
+
+            } catch (err) {
+                errorLine.textContent = `Error: ${err.message}`;
+                errorLine.classList.add('active');
+                console.error(err);
+            } finally {
+                statusLine.classList.remove('active');
+                runBtn.disabled = false;
+                runBtn.textContent = "RUN COUNCIL";
+            }
+        }
+
+        function renderResult(data) {
+            const score = Number(data.avg_score) || 0;
+            document.getElementById('gaugeScore').innerHTML = `${score.toFixed(1)} <span>/100</span>`;
+            const arc = document.getElementById('gaugeArc');
+            const dashTotal = 204;
+            const offset = dashTotal - (dashTotal * Math.min(score, 100) / 100);
+            arc.style.stroke = data.signal_color || "#D4AF37";
+            requestAnimationFrame(() => { arc.style.transition = "stroke-dashoffset 1s ease-out, stroke 0.5s"; arc.style.strokeDashoffset = offset; });
+
+            const badge = document.getElementById('signalBadge');
+            badge.textContent = data.signal_text || "—";
+            badge.style.background = data.signal_color || "#1E2942";
+            badge.style.color = "#070A13";
+            badge.style.borderColor = data.signal_color || "#1E2942";
+
+            document.getElementById('companyName').textContent = data.meta?.company_name || document.getElementById('tickerInput').value.toUpperCase();
+            document.getElementById('companySector').textContent = data.meta?.sector || "Sector unknown";
+            document.getElementById('valPE').textContent = data.meta?.trailing_pe || "–";
+            document.getElementById('valPB').textContent = data.meta?.price_to_book || "–";
+            document.getElementById('valROE').textContent = data.meta?.roe_percent || "–";
+            document.getElementById('valDE').textContent = data.meta?.debt_to_equity || "–";
+            document.getElementById('valFCF').textContent = data.meta?.free_cash_flow || "–";
+
+            const qCounts = { q1: 0, q2: 0, q3: 0, q4: 0 };
+            Object.keys(expertConfig).forEach(key => {
+                const review = data.scores?.[key];
+                const cfg = expertConfig[key];
+                const scoreEl = document.getElementById(`score-${key}`);
+                const barEl = document.getElementById(`bar-${key}`);
+                const reasonEl = document.getElementById(`reason-${key}`);
+                const cardEl = document.getElementById(`card-${key}`);
+                if (!review || !scoreEl) return;
+
+                const val = Number(review.score) || 0;
+                scoreEl.textContent = val;
+                reasonEl.textContent = review.reason || "";
+                barEl.style.width = `${val}%`;
+
+                let cls = "avoid";
+                if (val >= 70) cls = "buy";
+                else if (val >= 50) cls = "hold";
+
+                cardEl.className = `expert-card ${cls}`;
+                scoreEl.className = `expert-score ${cls}`;
+                barEl.className = `bar-fill ${cls}`;
+                qCounts[cfg.quad]++;
+            });
+
+            document.getElementById('q1-count').textContent = `${qCounts.q1}/${QUAD_TOTALS.q1}`;
+            document.getElementById('q2-count').textContent = `${qCounts.q2}/${QUAD_TOTALS.q2}`;
+            document.getElementById('q3-count').textContent = `${qCounts.q3}/${QUAD_TOTALS.q3}`;
+            document.getElementById('q4-count').textContent = `${qCounts.q4}/${QUAD_TOTALS.q4}`;
+        }
+
+        document.getElementById('tickerInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') triggerAnalysis();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            buildTape();
+            renderPlaceholders();
+        });
+    </script>
+</body>
+
+</html>
